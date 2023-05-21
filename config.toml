@@ -1,5 +1,5 @@
 languageCode = "en-us"
-baseUrl = "https://ksrof.com"
+baseUrl = ""
 title = "Ksrof's Blog"
 theme = "anubis"
 paginate = 10
