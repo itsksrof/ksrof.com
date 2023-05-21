@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Ksrof&#39;s Blog</title>
-    <link>https://ksrof.com/</link>
+    <link>/</link>
     <description>Ksrof&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 21 May 2023 15:15:46 +0200</lastBuildDate>
     
-    <atom:link href="https://ksrof.com/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>My First Post</title>
-      <link>https://ksrof.com/posts/my-first-post/</link>
+      <link>/posts/my-first-post/</link>
       <pubDate>Sun, 21 May 2023 15:15:46 +0200</pubDate>
       
-      <guid>https://ksrof.com/posts/my-first-post/</guid>
+      <guid>/posts/my-first-post/</guid>
       <description>&lt;h2 id=&#34;introduction&#34; &gt;Introduction
 &lt;span&gt;
     &lt;a href=&#34;#introduction&#34;&gt;
