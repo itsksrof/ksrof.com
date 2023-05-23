@@ -1,3 +1,6 @@
 [submodule "themes/anubis"]
 	path = themes/anubis
 	url = https://github.com/mitrichius/hugo-theme-anubis.git
+[submodule "themes/plausible"]
+	path = themes/plausible
+	url = https://github.com/divinerites/plausible-hugo.git
