@@ -70,7 +70,8 @@ unsafe = true
 [params.plausible]
 enable = true
 domain = "ksrof.com"
-outbound_link = true
+proxy_netlify = true
+outbound_link = false
 file_downloads = false
 debug = false
 gitstar = false
