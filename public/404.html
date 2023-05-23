@@ -118,14 +118,20 @@
 
 
 
-    
 
 
 
     
+        <link rel="preconnect" href="https://plausible.io">
     
         
-        <script defer  data-domain="ksrof.com" src="/misc/js/script.js" data-api="/misc/api/event"></script>
+        <script defer  data-domain="ksrof.com" src="https://plausible.io/js/plausible.js" ></script>
+
+<!-- If you are using Content-Security-Policy, do not forget to add this code to your CSP : 
+  script-src 'unsafe-inline' https://plausible.io
+  connect-src 'unsafe-inline' https://plausible.io
+  or just add the partial 'plausible_csp.html' to those 2 csp directives in your 'index.headers' file
+-->
 
 
 
