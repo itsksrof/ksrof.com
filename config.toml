@@ -1,7 +1,7 @@
 languageCode = "en-us"
 baseUrl = ""
 title = "Ksrof's Blog"
-theme = "anubis"
+theme = ["anubis", "plausible"]
 paginate = 10
 # disqusShortname = "yourdiscusshortname"
 # googleAnalytics = "G-12345"
@@ -66,3 +66,11 @@ rssAsSocialIcon = true
 
 [markup.goldmark.renderer]
 unsafe = true
+
+[params.plausible]
+enable = true
+domain = "ksrof.com"
+outbound_link = true
+file_downloads = false
+debug = false
+gitstar = false
