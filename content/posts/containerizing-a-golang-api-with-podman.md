@@ -4,7 +4,7 @@ date: 2023-05-28T13:20:26+02:00
 description: "Using Podman to develop an API with Golang and MySQL"
 tags: ["podman", "golang", "mysql", "containers"]
 categories: ["devops"]
-draft: true
+draft: false
 ---
 
 My way of developing personal software with Golang never goes far away from
