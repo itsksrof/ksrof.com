@@ -368,7 +368,7 @@ spec:
 ```
 
 Impressive isn't it? With this new file we can safely remove the containers that
-we've started using `podman rm -f c662d854f8fa ea0d36dbb1a8` and passing in the
+we've started using `podman rm -f <container-id>` and passing in the
 id's of the containers. You can visualize that info by running `podman ps`.
 
 And now, instead of instantiating each and every container separately we can
@@ -439,7 +439,7 @@ docker.io/library/mysql     latest            05db07cd74c0  4 days ago    579 MB
 docker.io/library/golang    1.20-buster       e92e76829029  5 days ago    742 MB
 ```
 
-And then running `podman rmi a26cf610bfef db276ed7ca45 8687708981da` with the id's
+And then running `podman rmi <container-id>` with the id's
 of the images that we wish to remove. Now if you were to run the `podman play kube`
 command you'll be probably greeted with an error telling you that the image you want
 to run cannot be found. Don't worry just go back to the building step and you'll be
