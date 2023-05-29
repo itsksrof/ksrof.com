@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+
+
+    
+
+<html lang="en-us" data-theme="dark">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>Containerizing a Golang API with Podman - Ksrof&#39;s Blog</title>
+
+<meta name="description" content="Using Podman to develop an API with Golang and MySQL">
+
+
+
+
+
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="favicon.png">
+
+
+<style>
+  body {
+    visibility: hidden;
+    opacity: 0;
+  }
+</style>
+
+<noscript>
+  <style>
+    body {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</noscript>
+
+
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <link rel="stylesheet" href="/css/style.min.e09cf96f983a299281114ef2f094ab95577ebd5f9686b60b74a0a315031a14a9.css" integrity="sha256-4Jz5b5g6KZKBEU7y8JSrlVd&#43;vV&#43;WhrYLdKCjFQMaFKk=">
+    
+
+
+
+
+
+    
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <script src="/js/script.min.74bf1a3fcf1af396efa4acf3e660e876b61a2153ab9cbe1893ac24ea6d4f94ee.js" type="text/javascript" charset="utf-8" integrity="sha256-dL8aP88a85bvpKzz5mDodrYaIVOrnL4Yk6wk6m1PlO4="></script>
+    
+
+
+
+
+
+
+
+<meta property="og:title" content="Containerizing a Golang API with Podman" />
+<meta property="og:description" content="Using Podman to develop an API with Golang and MySQL" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/containerizing-a-golang-api-with-podman/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-05-28T13:20:26+02:00" />
+<meta property="article:modified_time" content="2023-05-28T13:20:26+02:00" />
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Containerizing a Golang API with Podman"/>
+<meta name="twitter:description" content="Using Podman to develop an API with Golang and MySQL"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        <link rel="preconnect" href="https://plausible.io">
+    
+        
+        <script defer  data-domain="ksrof.com" src="https://plausible.io/js/plausible.js" ></script>
+
+<!-- If you are using Content-Security-Policy, do not forget to add this code to your CSP : 
+  script-src 'unsafe-inline' https://plausible.io
+  connect-src 'unsafe-inline' https://plausible.io
+  or just add the partial 'plausible_csp.html' to those 2 csp directives in your 'index.headers' file
+-->
+
+
+
+    
+    <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+    <script>
+         
+         
+         
+    </script>
+
+    
+
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <div class="header-top">
+    <h1 class="site-title">
+    <a href="/">Ksrof&#39;s Blog</a>
+</h1>
+    <ul class="social-icons">
+
+
+
+
+    <li>
+            <a href="/index.xml" title="RSS" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+</ul>
+</div>
+
+    <nav>
+        
+        
+        <a class="" href="/posts/" title="Archive">Archive</a>
+        
+    </nav>
+
+
+
+
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+
+    <article class="post h-entry">
+        <div class="post-header">
+            <header>
+                <h1 class="p-name post-title">Containerizing a Golang API with Podman</h1>
+
+                
+            </header>
+        </div>
+        <div class="content e-content">
+            <p>My way of developing personal software with Golang never goes far away from
+using the provided tools from the language, and when needed I use third-party tools
+that can either be installed using <code>go install</code> or by running a simple shell script.</p>
+<p>Usually I leave links to the tools I&rsquo;ve installed in the README of the project, that
+way I&rsquo;m able to <em>&ldquo;reproduce&rdquo;</em> the development environment when doing a fresh clone
+of the repo.</p>
+<p>The thing is that problems start to emerge the moment I share my code with another
+individual, because yes, the tools needed are in the documentation, but when using
+them I only took my system into consideration.</p>
+<p>So, to avoid the unnecessary screaming and raging that occurs when trying to set up
+a development environment on a different operating system, or even on a different
+architecture, and the obnoxious <em>it works on my machine</em>. In this post I&rsquo;ll be
+containerizing a little project to run isolatedly and in a reproducible environment.</p>
+<h2 id="going-with-podman" >Going with Podman
+<span>
+    <a href="#going-with-podman">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>The tool that always comes to my mind when thinking about containerizing an application,
+is <a href="https://docs.docker.com/get-started/overview/">Docker</a>, I&rsquo;ve been using it in pretty
+much every professional project I&rsquo;ve ever worked on, and so far has worked greatly. The
+issue that I have with it is not a technical one, but rather a personal one, things have
+changed immensely, Docker is now a full-blown company, which isn&rsquo;t a bad thing, what sets
+me back is that I don&rsquo;t exactly understand the licensing on many of the tools that they provide.
+That alone made it worth it for me to go and explore other tools, and see if I could find a suitable
+replacement for it.</p>
+<p>In my search I stumbled upon <a href="https://docs.podman.io/en/latest/index.html">Podman</a> which
+defines itself as a <em>&ldquo;daemonless, open source, Linux native tool designed to make
+it easy to find, run, build, share and deploy applications using Open Containers Initiative (OCI)
+Containers and Container Images.&rdquo;</em> and can be used as a drop-in replacement for the better-known
+Docker runtime.</p>
+<p>It sounded heavenly for me, so I thought it would be worth it to take it for a spin, and see the
+process of containerizing a little API made with Golang and MySQL using Podman.</p>
+<h2 id="containerizing-our-application" >Containerizing our application
+<span>
+    <a href="#containerizing-our-application">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Let&rsquo;s work on the assumption that we need to create a simple API to return books.</p>
+<p>We have our <code>main.go</code> file which can look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;database/sql&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;encoding/json&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;log&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;net/http&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">_</span> <span style="color:#e6db74">&#34;github.com/go-sql-driver/mysql&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">book</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">ID</span>     <span style="color:#66d9ef">uint</span>   <span style="color:#e6db74">`json:&#34;id&#34;`</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Title</span>  <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;title&#34;`</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Author</span> <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;author&#34;`</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">getBooks</span>(<span style="color:#a6e22e">db</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">sql</span>.<span style="color:#a6e22e">DB</span>) (<span style="color:#a6e22e">books</span> []<span style="color:#a6e22e">book</span>, <span style="color:#a6e22e">err</span> <span style="color:#66d9ef">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">book</span> <span style="color:#a6e22e">book</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">rows</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">Query</span>(<span style="color:#e6db74">&#34;SELECT * FROM local_db.books&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>, <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">rows</span>.<span style="color:#a6e22e">Close</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">rows</span>.<span style="color:#a6e22e">Next</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">rows</span>.<span style="color:#a6e22e">Scan</span>(
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">book</span>.<span style="color:#a6e22e">ID</span>,
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">book</span>.<span style="color:#a6e22e">Title</span>,
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">book</span>.<span style="color:#a6e22e">Author</span>,
+</span></span><span style="display:flex;"><span>		); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>, <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">books</span> = append(<span style="color:#a6e22e">books</span>, <span style="color:#a6e22e">book</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">books</span>, <span style="color:#66d9ef">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">getBooksHandler</span>(<span style="color:#a6e22e">db</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">sql</span>.<span style="color:#a6e22e">DB</span>) <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">HandlerFunc</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">books</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">getBooks</span>(<span style="color:#a6e22e">db</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">w</span>.<span style="color:#a6e22e">WriteHeader</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">StatusInternalServerError</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">json</span>.<span style="color:#a6e22e">NewEncoder</span>(<span style="color:#a6e22e">w</span>).<span style="color:#a6e22e">Encode</span>(<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">string</span>{
+</span></span><span style="display:flex;"><span>				<span style="color:#e6db74">&#34;error&#34;</span>: <span style="color:#a6e22e">err</span>.<span style="color:#a6e22e">Error</span>(),
+</span></span><span style="display:flex;"><span>			})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">w</span>.<span style="color:#a6e22e">WriteHeader</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">StatusOK</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">json</span>.<span style="color:#a6e22e">NewEncoder</span>(<span style="color:#a6e22e">w</span>).<span style="color:#a6e22e">Encode</span>(<span style="color:#a6e22e">books</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">db</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">sql</span>.<span style="color:#a6e22e">Open</span>(<span style="color:#e6db74">&#34;mysql&#34;</span>, <span style="color:#e6db74">&#34;root:pass@tcp(localhost)/local_db?parseTime=true&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;failed to open db connection: %v\n&#34;</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">HandleFunc</span>(<span style="color:#e6db74">&#34;/books&#34;</span>, <span style="color:#a6e22e">getBooksHandler</span>(<span style="color:#a6e22e">db</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ListenAndServe</span>(<span style="color:#e6db74">&#34;:8080&#34;</span>, <span style="color:#66d9ef">nil</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;failed to start http server: %v\n&#34;</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>And our <code>create-local-db.sql</code> which creates a new database schema and pre-seeds it with data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">DATABASE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> local_db;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DATABASE</span> local_db;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>USE local_db;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> books;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> books (
+</span></span><span style="display:flex;"><span>    id int unsigned <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> AUTO_INCREMENT,
+</span></span><span style="display:flex;"><span>    title varchar(<span style="color:#ae81ff">60</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#e6db74">&#39;&#39;</span>,
+</span></span><span style="display:flex;"><span>    author varchar(<span style="color:#ae81ff">60</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#e6db74">&#39;&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>(id)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> books <span style="color:#66d9ef">VALUES</span>(<span style="color:#ae81ff">1</span>, <span style="color:#e6db74">&#39;1984&#39;</span>, <span style="color:#e6db74">&#39;George Orwell&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> books <span style="color:#66d9ef">VALUES</span>(<span style="color:#ae81ff">2</span>, <span style="color:#e6db74">&#39;Creativity, Inc&#39;</span>, <span style="color:#e6db74">&#39;Ed Catmull&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> books <span style="color:#66d9ef">VALUES</span>(<span style="color:#ae81ff">3</span>, <span style="color:#e6db74">&#39;The Brothers Karamazov&#39;</span>, <span style="color:#e6db74">&#39;Fyodor Dostoevsky&#39;</span>);
+</span></span></code></pre></div><p>With these two pieces in place, we can begin to containerize our application, we&rsquo;ll begin
+by building the MySQL database server, and then we&rsquo;ll move on to building the Golang API.</p>
+<h3 id="setting-up-our-database-container" >Setting up our database container
+<span>
+    <a href="#setting-up-our-database-container">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>In-order to build a container, a special file is required, in that file we&rsquo;ll declare
+the necessary steps that need to successfully run for our container to be built.</p>
+<p>Usually the file that performs this heavy lifting is called a <code>Dockerfile</code>, but since we
+are not using Docker, and I want to adhere to the OCI <em>(Open Container Initiative)</em> standards,
+I will be naming it <code>Containerfile</code>.</p>
+<p>It looks like the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Use the official mysql image to create a mysql instance.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># https://hub.docker.com/_/mysql</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> mysql</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Copy the database definition to a temporal directory.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> ./create-local-db.sql /tmp<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Expose the port used by the mysql instance.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 3306</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Run the mysql server executable and read the database</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># definition file at startup.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;mysqld&#34;</span>, <span style="color:#e6db74">&#34;--init-file=/tmp/create-local-db.sql&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Now we can build our container image:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman build -t mysql-container ./mysql <span style="color:#75715e"># The path to your Containerfile</span>
+</span></span></code></pre></div><p><strong>INFO:</strong> The <code>-t</code> flag or <code>--tag</code> allows us to specify a name for the resulting image.</p>
+<p>And use it to initialize our MySQL database server:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman run -d -e MYSQL_ROOT_PASSWORD<span style="color:#f92672">=</span>pass -p 3306:3306 mysql-container
+</span></span></code></pre></div><p><strong>INFO:</strong> The <code>-d</code> flag or <code>--detach</code> allows us to run the container in the background,
+and prints the new container ID. The <code>-e</code> flag or <code>--env</code> allows us to set arbitrary environment
+variables that are available for the process to be launched inside the container. The <code>-p</code> flag or
+<code>--publish</code> allows us to publish a container&rsquo;s port, or range of ports, to the host.</p>
+<p>And bam! if we go to our preferred MySQL client <em>(or through the mysql cli)</em> and connect to <code>localhost:3306</code>
+as <code>root</code> using the password that we&rsquo;ve specified in the <code>MYSQL_ROOT_PASSWORD</code> environment variable, you&rsquo;ll
+be able to see the <code>local_db</code> schema pre-seeded with data.</p>
+<h3 id="setting-up-our-golang-container" >Setting up our golang container
+<span>
+    <a href="#setting-up-our-golang-container">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>For this part we&rsquo;ll also need a <code>Containerfile</code> in place to do the heavy lifting, and since
+we already have one, it would be wise to move it to another directory, i.e. <code>/mysql</code>, and
+leave the new one at the root. If you do so, don&rsquo;t forget to update the paths of the <code>Containerfile</code>
+that has been moved, or move the files to the same directory.</p>
+<p>The <code>Containerfile</code> to build our Golang container looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Use the official golang image to create a binary.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># This is based on Debian and sets the GOPATH to /go.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># https://hub.docker.com/_/golang </span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang:1.20-buster</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Create and change to the app directory.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Retrieve application dependencies.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># This allows the container build to reuse cached dependencies.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Expecting to copy go.mod and if present go.sum.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> go.* ./<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> go mod download<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Copy local code to the container image.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> *.go ./<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Build the binary.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> go build -v -o /go-api<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Expose the port used by the web service.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8080</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Run the web service on container startup.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;/go-api&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Now we can build our container image:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman build -t golang-container ./Containerfile <span style="color:#75715e"># The path to your Containerfile</span>
+</span></span></code></pre></div><p>And use it to initialize our Golang API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman run -d -p 8080:8080 golang-container
+</span></span></code></pre></div><p>This time, there is no bam! Because what you are probably getting is an error that says
+<code>connection refused</code> when trying to hit the <code>/books</code> endpoint.</p>
+<p>Why? Think about what we just did, we&rsquo;ve built and initialized two containers, one for
+our MySQL database server, and the other for our Golang API, but they don&rsquo;t know a thing
+about each other. If you were to put your IPv4 instead of <code>localhost</code> in the database connection
+string, it would work, since that range of ports is published in the host, but for our humble
+golang container <code>localhost</code> does not map to any database server.</p>
+<h3 id="creating-a-pod-to-share-resources" >Creating a pod to share resources
+<span>
+    <a href="#creating-a-pod-to-share-resources">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>A Pod is a group of one or more containers, with shared storage and network resources,
+and a specification for how to run the containers. In our example we have a MySQL container
+and a Golang container, but we would prefer not to bind the database to a routable network.
+Using a pod, we could bind the <code>localhost</code> address of the pod and all containers in that
+pod will be able to connect to it because of the shared network name space.</p>
+<p>To create a pod we will need to know the names or id&rsquo;s of the containers that we wish
+to run together. We can do so by running the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman ps
+</span></span></code></pre></div><p>It will output to <code>stdout</code> something similar to this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>CONTAINER ID  IMAGE                              COMMAND               CREATED        STATUS        PORTS                   NAMES
+</span></span><span style="display:flex;"><span>c662d854f8fa  localhost/mysql-container:latest   mysqld --init-fil...  6 seconds ago  Up 6 seconds  0.0.0.0:3306-&gt;3306/tcp  admiring_nightingale
+</span></span><span style="display:flex;"><span>ea0d36dbb1a8  localhost/golang-container:latest  /go-api               1 second ago   Up 1 second   0.0.0.0:8080-&gt;8080/tcp  friendly_wescoff
+</span></span></code></pre></div><p>With that information our next step will be to use the <code>podman generate kube</code> command, to
+generate a Kubernetes YAML specification from podman containers, pods or volumes:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman generate kube -s -f podman-compose.yaml admiring_nightingale friendly_wescoff
+</span></span></code></pre></div><p><strong>INFO:</strong> The <code>-s</code> flag or <code>--service</code> allows us to generate a Kubernetes service object
+in addition to the pod. The <code>-f</code> flag or <code>--filename</code> allows us to pipe the output to a
+given file instead of <code>stdout</code>.</p>
+<p>You can name the file anything you want, I choose <code>podman-compose</code> because of the similarities
+to <code>docker-compose</code>, that way other people can easily guess what it does.</p>
+<p>If we take a look inside, this is what we can expect to find:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Save the output of this file and use kubectl create -f to import</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># it into Kubernetes.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Created with podman-4.5.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># NOTE: If you generated this yaml from an unprivileged and rootless podman container on an SELinux</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># enabled system, check the podman generate kube man page for steps to follow to ensure that your pod/container</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># has the right permissions to access the volumes added.</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">creationTimestamp</span>: <span style="color:#e6db74">&#34;2023-05-28T19:58:30Z&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">admiringnightingale-pod</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">admiringnightingale-pod</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#e6db74">&#34;3306&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nodePort</span>: <span style="color:#ae81ff">30195</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">3306</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">3306</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#e6db74">&#34;8080&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nodePort</span>: <span style="color:#ae81ff">31682</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">admiringnightingale-pod</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">NodePort</span>
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Pod</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">annotations</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">io.podman.annotations.ulimit</span>: <span style="color:#ae81ff">nofile=524288:524288,nproc=127618:127618</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">org.opencontainers.image.base.digest/admiringnightingale</span>: <span style="color:#ae81ff">sha256:13e429971e970ebcb7bc611de52d71a3c444247dc67cf7475a02718f</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">org.opencontainers.image.base.digest/friendlywescoff</span>: <span style="color:#ae81ff">sha256:a33d71b6c2bbd1397b1e906c3f7df0a645477d7249f1f034513f1cf4</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">org.opencontainers.image.base.name/admiringnightingale</span>: <span style="color:#ae81ff">docker.io/library/mysql:latest</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">org.opencontainers.image.base.name/friendlywescoff</span>: <span style="color:#ae81ff">docker.io/library/golang:1.20-buster</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">creationTimestamp</span>: <span style="color:#e6db74">&#34;2023-05-28T19:58:30Z&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">admiringnightingale-pod</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">admiringnightingale-pod</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">args</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ae81ff">mysqld</span>
+</span></span><span style="display:flex;"><span>    - --<span style="color:#ae81ff">init-file=/tmp/create-local-db.sql</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">env</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">MYSQL_ROOT_PASSWORD</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">value</span>: <span style="color:#ae81ff">pass</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">localhost/mysql-container:latest</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">admiringnightingale</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">3306</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">tty</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/var/lib/mysql</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">name</span>: <span style="color:#ae81ff">10fc6631947b113462912416cb6ed5a014d0c171a12520acd3903ad5684fbdfb-pvc</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">image</span>: <span style="color:#ae81ff">localhost/golang-container:latest</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">friendlywescoff</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">tty</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">10fc6631947b113462912416cb6ed5a014d0c171a12520acd3903ad5684fbdfb-pvc</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">persistentVolumeClaim</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">claimName</span>: <span style="color:#ae81ff">10fc6631947b113462912416cb6ed5a014d0c171a12520acd3903ad5684fbdfb</span>
+</span></span></code></pre></div><p>Impressive isn&rsquo;t it? With this new file we can safely remove the containers that
+we&rsquo;ve started using <code>podman rm -f &lt;container-id&gt;</code> and passing in the
+id&rsquo;s of the containers. You can visualize that info by running <code>podman ps</code>.</p>
+<p>And now, instead of instantiating each and every container separately we can
+start everything that we need from our <code>podman-compose.yaml</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman play kube podman-compose.yaml
+</span></span></code></pre></div><p>This will create a pod, and inside that pod it will initialise our containers,
+that way they are able to share the resources available within the pod, this is
+what allows our Golang API to connect to our MySQL database server, because now
+<code>localhost</code> is binded to the pod, and thus it can be used by all the containers
+of the pod.</p>
+<p>Awesome! Let&rsquo;s see what we get when hitting the <code>/books</code> endpoint.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>[
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&#34;id&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;1984&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&#34;author&#34;</span>: <span style="color:#e6db74">&#34;George Orwell&#34;</span>
+</span></span><span style="display:flex;"><span>	},
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&#34;id&#34;</span>: <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;Creativity, Inc&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&#34;author&#34;</span>: <span style="color:#e6db74">&#34;Ed Catmull&#34;</span>
+</span></span><span style="display:flex;"><span>	},
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&#34;id&#34;</span>: <span style="color:#ae81ff">3</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;The Brothers Karamazov&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&#34;author&#34;</span>: <span style="color:#e6db74">&#34;Fyodor Dostoevsky&#34;</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>You&rsquo;ve did it! Time to pat yourself in the back, and tell your colleagues about
+Podman, just kidding, but if you got this far, congratulations, you&rsquo;re now able
+to run your Golang APIs in a containerized way, and that alone opens a whole lot
+of possibilities and new paths to explore!</p>
+<h3 id="cleaning-up-before-leaving" >Cleaning up before leaving
+<span>
+    <a href="#cleaning-up-before-leaving">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>Since we already have our <code>podman-compose.yaml</code> which tells our containers how they
+should be orchestrated, it is no surprise that we can use a simple command, to make them
+yeet themselves out of existence:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman kube down podman-compose.yaml
+</span></span></code></pre></div><p>And if we also want to remove the images that we&rsquo;ve created using <code>podman build</code>, we
+can do so by first listing the images that we have available:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>podman images
+</span></span></code></pre></div><p>It will output to <code>stdout</code> something similar to this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-txt" data-lang="txt"><span style="display:flex;"><span>REPOSITORY                  TAG               IMAGE ID      CREATED       SIZE
+</span></span><span style="display:flex;"><span>localhost/mysql-container   latest            a26cf610bfef  11 hours ago  579 MB
+</span></span><span style="display:flex;"><span>localhost/golang-container  latest            db276ed7ca45  11 hours ago  817 MB
+</span></span><span style="display:flex;"><span>localhost/podman-pause      4.5.0-1681486942  8687708981da  20 hours ago  1.11 MB
+</span></span><span style="display:flex;"><span>docker.io/library/mysql     latest            05db07cd74c0  4 days ago    579 MB
+</span></span><span style="display:flex;"><span>docker.io/library/golang    1.20-buster       e92e76829029  5 days ago    742 MB
+</span></span></code></pre></div><p>And then running <code>podman rmi &lt;container-id&gt;</code> with the id&rsquo;s
+of the images that we wish to remove. Now if you were to run the <code>podman play kube</code>
+command you&rsquo;ll be probably greeted with an error telling you that the image you want
+to run cannot be found. Don&rsquo;t worry just go back to the building step and you&rsquo;ll be
+fine.</p>
+<h2 id="thoughts" >Thoughts
+<span>
+    <a href="#thoughts">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Knowledge wise it has been really easy to transition from Docker to Podman, pretty much
+every command that I was accustomed to was also available in Podman. Also a thing that
+drew my attention was the fact that every Podman command can be run as a non-privileged
+user, which allows us to limit its level of access within our operating system.</p>
+<p>After tinkering with it this weekend, I&rsquo;m left wanting to use it more and see how it
+performs in a complexer project.</p>
+<p>Thank you for your time, see you next week, ksrof out.</p>
+<p>P.S. You can find the source code used in this article <a href="https://github.com/itsksrof/go-podman-example">here</a>.</p>
+
+        </div>
+        
+
+    
+
+
+<div class="post-info">
+    
+        <div class="post-date dt-published"><a class="u-url" href="/posts/containerizing-a-golang-api-with-podman/">28-05-2023<a/></div>
+    
+
+    <a class="post-hidden-url u-url" href="/posts/containerizing-a-golang-api-with-podman/">/posts/containerizing-a-golang-api-with-podman/</a>
+    <a href="" class="p-name p-author post-hidden-author h-card" rel="me">ksrof</a>
+
+
+    <div class="post-taxonomies">
+        
+            <ul class="post-categories">
+                
+                    
+                    <li><a href="/categories/devops/">devops</a></li>
+                
+            </ul>
+        
+        
+            <ul class="post-tags">
+                
+                    
+                    <li><a href="/tags/podman/">#podman</a></li>
+                
+                    
+                    <li><a href="/tags/golang/">#golang</a></li>
+                
+                    
+                    <li><a href="/tags/mysql/">#mysql</a></li>
+                
+                    
+                    <li><a href="/tags/containers/">#containers</a></li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+
+    </article>
+
+    
+        
+        
+    
+
+    
+        
+    <div class="pagination post-pagination">
+        <div class="left pagination-item disabled">
+            
+        </div>
+        <div class="right pagination-item ">
+            
+                <a href="/posts/starting-anew/">Starting Anew</a>
+            
+        </div>
+    </div>
+
+
+
+
+    
+
+    
+        
+
+
+
+
+
+
+
+    
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© ksrof, 2023<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
+            
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+
+<script>
+const STORAGE_KEY = 'user-color-scheme'
+const defaultTheme = "dark-without-switcher"
+
+let currentTheme
+let switchButton
+let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+const autoChangeScheme = e => {
+    currentTheme = e.matches ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', currentTheme)
+    changeButtonText()
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    switchButton = document.querySelector('.theme-switcher')
+    currentTheme = detectCurrentScheme()
+    if (currentTheme == 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark')
+    }
+    if (currentTheme == 'auto') {
+        autoChangeScheme(autoDefinedScheme);
+        autoDefinedScheme.addListener(autoChangeScheme);
+    }
+
+    if (switchButton) {
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    }
+  
+    showContent()
+})
+
+function detectCurrentScheme() {
+    if (localStorage !== null && localStorage.getItem(STORAGE_KEY)) {
+        return localStorage.getItem(STORAGE_KEY)
+    } 
+    if (defaultTheme) {
+        return defaultTheme
+    } 
+    if (!window.matchMedia) {
+        return 'light'
+    } 
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+    }
+    return 'light'
+}
+
+function changeButtonText()
+{   
+    if (switchButton) {
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+}
+
+function switchTheme(e) {
+    if (currentTheme == 'dark') {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'light')
+        document.documentElement.setAttribute('data-theme', 'light')
+        currentTheme = 'light'
+    } else {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'dark')
+        document.documentElement.setAttribute('data-theme', 'dark')
+        currentTheme = 'dark'
+    }
+    changeButtonText()
+}
+
+function showContent() {
+    document.body.style.visibility = 'visible';
+    document.body.style.opacity = 1;
+}
+</script>   
+    </div>
+
+    <p class="h-card vcard">
+
+    <a href= class="p-name u-url url fn" rel="me">ksrof</a> 
+
+     
+        /
+        <a class="p-email u-email email" rel="me" href="mailto:itsksrof@proton.me">itsksrof@proton.me</a>
+    
+
+    
+</p> 
+</footer>
+
+        
+    </div>
+</body>
+</html>

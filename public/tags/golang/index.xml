@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ksrof&#39;s Blog</title>
-    <link>/</link>
-    <description>Ksrof&#39;s Blog</description>
+    <title>golang on Ksrof&#39;s Blog</title>
+    <link>/tags/golang/</link>
+    <description>Ksrof&#39;s Blog (golang)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 28 May 2023 13:20:26 +0200</lastBuildDate>
     
-    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/tags/golang/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -401,35 +401,6 @@ user, which allows us to limit its level of access within our operating system.&
 performs in a complexer project.&lt;/p&gt;
 &lt;p&gt;Thank you for your time, see you next week, ksrof out.&lt;/p&gt;
 &lt;p&gt;P.S. You can find the source code used in this article &lt;a href=&#34;https://github.com/itsksrof/go-podman-example&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Starting Anew</title>
-      <link>/posts/starting-anew/</link>
-      <pubDate>Tue, 23 May 2023 08:00:00 +0200</pubDate>
-      
-      <guid>/posts/starting-anew/</guid>
-      <description>&lt;p&gt;Normally people do this kind of thing on their new year&amp;rsquo;s resolutions, but since I do not like
-to postpone stuff here I am, starting a new blog from the ashes of the previous one. But why?&lt;/p&gt;
-&lt;p&gt;Well it&amp;rsquo;s quite simple, I&amp;rsquo;ve noticed a certain pattern that keeps emerging in the things I personally
-do. When I have an idea, i.e. a blog, I tend to prototype something simple but functional, then
-I iterate over the base idea to add more functionalities to it, and then when everything is working,
-instead of using it to serve the purpose it was built for, I take an entirely different path and try to
-make it even more perfect, by either revamping the whole user interface or &lt;em&gt;the thing that happened
-this time&lt;/em&gt;, trying to build a fully fledged static site generator to post my shit. Yeah, I&amp;rsquo;m quite a
-DIY guy. But the problem does not reside in the idea of making a static site generator, nope, the thing
-is that I subconsciously see what I&amp;rsquo;ve just created as something incomplete, and my focus shifts
-entirely into creating that static site generator. I bet you can see the problem now, the feat that I
-was trying to accomplish is not something that you do in a weekend, unless you&amp;rsquo;re ThePrimeagen. So I&amp;rsquo;ve
-decided to still do that project because it&amp;rsquo;s a topic I&amp;rsquo;m interested in, but I will shove my perfectionism
-up my arse and use &lt;a href=&#34;https://gohugo.io&#34;&gt;hugo&lt;/a&gt;, which in all honesty it&amp;rsquo;s mind-blowingly great, to keep
-throwing content out.&lt;/p&gt;
-&lt;p&gt;From now on you can expect one article per week, all related to programming, and since I want to use
-this blog as a way to learn new stuff, many of the posts that you&amp;rsquo;ll find will be related to weekend
-projects that I have built, tech that I want to try out, or when I feel a bit philosophical, my point
-of view about a certain topic.&lt;/p&gt;
-&lt;p&gt;Thank you for your time, ksrof out.&lt;/p&gt;
 </description>
     </item>
     
