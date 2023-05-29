@@ -1,6 +1,6 @@
 ---
 title: "Containerizing a Golang API with Podman"
-date: 2023-05-28T13:20:26+02:00
+date: 2023-05-29T13:18:30+00:00
 description: "Using Podman to develop an API with Golang and MySQL"
 tags: ["podman", "golang", "mysql", "containers"]
 categories: ["devops"]
